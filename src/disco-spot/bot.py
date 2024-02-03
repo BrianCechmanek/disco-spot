@@ -7,7 +7,6 @@ import os
 import sys
 
 import discord
-from discord.ext import commands
 
 # logger = logging.getLogger('discord')
 # logger.setLevel(logging.DEBUG)
