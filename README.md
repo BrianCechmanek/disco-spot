@@ -23,6 +23,7 @@ So many, dude. But, baby steps
 * it stupidly grabs any \*.youtube.\* link. no processing for songs et c yet. or those weird you 
 * no pyproject.toml yet 
 * logging is all bodged - I just want a streamhandler to stdout. Un-muting the dicord.http logging is a _mess_ 
+* Using python `3.12` appears to be a mess as well (setuptools, pip); likely downgrade to 3.11
 
 # TODOs
 
