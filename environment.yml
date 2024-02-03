@@ -6,4 +6,4 @@ dependencies:
   - discord.py=2.3.2
   - pre-commit>=3.4.0
   - pip>=23.3.1
-  - spotipy=2.23.0 
+  - spotipy=2.23.0
