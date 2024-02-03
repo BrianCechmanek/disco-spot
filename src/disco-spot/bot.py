@@ -32,7 +32,6 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix=">", intents=intents)
 
 
 @client.event
@@ -47,7 +46,7 @@ async def on_message(message):
         return
     if not message.channel.name == "music":
         return
-    
+
     if message.content.startswith("$hello"):
         await message.channel.send("Hello!")
         # print(f"message : {message.content}\nchannel: {message.channel}\n author: {message.author}\n server: {message.guild.name}")
@@ -67,13 +66,6 @@ async def on_message(message):
         print("No Action for message : ", message.content)
 
 
-@bot.event
-async def on_message(message):
-    if message.channel.name == "music":
-        url = message.content
-        # Check if URL is a YouTube link here
-
-
 def message_is_youtube_link(message) -> bool:
     if "youtube" in message.content.lower():
         print("message.content has YOUTUBE: ", message.content)
@@ -89,10 +81,10 @@ def add_song_to_spotify(link: str):
     ...
 
 
-def main(client, bot):
+def main(client):
     # Suppress the default configuration since we have our own
     client.run(token=DISCORD_BOT_TOKEN, log_handler=None)
 
 
 if __name__ == "__main__":
-    main(client, bot)
+    main(client)
