@@ -4,3 +4,5 @@ channels:
 dependencies:
   - python=3.12.*
   - discord.py=2.3.2
+  - spotipy=2.23.0 
+  - pre-commit>=3.4.0
