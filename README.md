@@ -6,7 +6,7 @@ A friendly discord bot to help add youtube music links to a spotify playlist.
 
 * I made this on Windows and I'm really _really_ lazy. So it uses conda
 * So just run `conda env create -f environment.yml` and it'll set you up. Don't like it? want to use `pdm`? Sure, man. I'm not a cop
-* I added in [pre-commit]() for all your isort/black/ruff needs
+* I added in [pre-commit](https://pre-commit.com/) for all your isort/black/ruff needs
 
 # Setup & Running
 
@@ -23,7 +23,7 @@ So many, dude. But, baby steps
 * it stupidly grabs any \*.youtube.\* link. no processing for songs et c yet. or those weird you
 * no pyproject.toml yet
 * logging is all bodged - I just want a streamhandler to stdout. Un-muting the dicord.http logging is a _mess_
-* Using python `3.12` appears to be a mess as well (setuptools, pip); likely downgrade to 3.11
+* ~~Using python `3.12` appears to be a mess as well (setuptools, pip); likely downgrade to 3.11~~ Done. 3.11 fixes pre-commit
 
 # TODOs
 
