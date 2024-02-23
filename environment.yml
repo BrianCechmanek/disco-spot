@@ -2,9 +2,11 @@ name: disco
 channels:
   - conda-forge
 dependencies:
-  - python=3.11.*
   - discord.py=2.3.2
-  - pre-commit>=3.4.0
-  - python-dotenv=0.21.0
+  - ipykernel=6.29.2
   - pip>=23.3.1
+  - pre-commit>=3.4.0
+  - python=3.11.*
+  - python-dotenv=0.21.0
+  - python-youtube=0.9.4
   - spotipy=2.23.0

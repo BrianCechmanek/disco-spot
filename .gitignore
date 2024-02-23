@@ -10,3 +10,9 @@
 
 # Finder (MacOS) folder config
 .DS_Store
+
+#python things
+__pycache__
+
+# spotify
+src/disco_spot/.cache
