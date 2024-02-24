@@ -1,5 +1,5 @@
 [project]
-name = "disco_spot"
+name = "disco-spot"
 version = "0.0.1"
 authors = [
   {name = "Brian Cechmanek", email = "briankent@duck.com"}
@@ -9,7 +9,11 @@ maintainers = [
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
+
+[build-system]
+requires = ["setuptools", "wheel"]  # PEP 508 specifications.
+
 dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]
-dependencies = { file = ["dev.lock"] }
+dependencies = { file = ["requirements.lock"] }
