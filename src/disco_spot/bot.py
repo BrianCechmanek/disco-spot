@@ -1,4 +1,5 @@
 # minimal discord bot to read messages with "youtube" in them
+# see examples for further functionality https://github.com/spotipy-dev/spotipy/tree/master/examples
 
 from dotenv import load_dotenv
 import logging
@@ -8,7 +9,7 @@ import re
 import sys
 
 import discord
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 import spotipy
 
 from pyyoutube import Api   # https://console.cloud.google.com/apis/credentials?)
@@ -31,13 +32,13 @@ logging.debug("Starting bot -- logging works")
 
 # ENV VARS
 load_dotenv()  # will search for .env file in local folder and load variables
-DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
-SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
-SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
-SPOTIFY_USERNAME= os.getenv("SPOTIFY_USERNAME")
-PLAYLIST_ID="1vZfee7pkUhQuAC3CUnKUY"
+DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
+YOUTUBE_API_KEY = os.environ["YOUTUBE_API_KEY"]
+SPOTIPY_CLIENT_ID = os.environ["SPOTIPY_CLIENT_ID"]
+SPOTIPY_CLIENT_SECRET = os.environ["SPOTIPY_CLIENT_SECRET"]
+SPOTIPY_REDIRECT_URI = os.environ["SPOTIPY_REDIRECT_URI"]
+SPOTIFY_USERNAME= os.environ["SPOTIFY_USERNAME"]
+PLAYLIST_ID=os.environ["PLAYLIST_ID"]
 
 # discord client
 intents = discord.Intents.default()
@@ -48,9 +49,10 @@ client = discord.Client(intents=intents)
 yt_api = Api(api_key=os.environ['YOUTUBE_API_KEY'])
 
 # Set up Spotify API
-# scope = "playlist-modify-public"
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=os.environ['SPOTIPY_CLIENT_ID'], 
-                                                           client_secret=os.environ['SPOTIPY_CLIENT_SECRET']))
+scope = "playlist-modify-private"
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+# sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=os.environ['SPOTIPY_CLIENT_ID'], 
+#                                                            client_secret=os.environ['SPOTIPY_CLIENT_SECRET']))
 
 
 @client.event
@@ -72,7 +74,7 @@ async def on_message(message):
         return
     
     # begin check sequences
-    is_yt, yt_id = content_has_youtube_link(message.content)
+    is_yt, *yt_id = content_has_youtube_link(message.content)
     if is_yt:
         await message.channel.send(
             """I see you posted a YouTube link. I'm currently
@@ -85,8 +87,11 @@ async def on_message(message):
         yt_title = get_title_from_yt_link(yt_id)
         spotify_uri = get_spotify_uri_from_title(yt_title)
         if spotify_uri:
-            add_track_to_playlist(spotify_uri)
-            await message.channel.send(f"Added {yt_title} to the playlist. If this is wrong. thumbs down. I'll work on removing it")
+            res = add_track_to_playlist(spotify_uri)
+            if res:
+                await message.channel.send(f"Added {yt_title} to the playlist. If this is wrong. thumbs down. I'll work on removing it")
+            else:
+                await message.channel.send(f"Failed to add {yt_title} to the playlist.")
         else:
             print("No Spotify URI found for song: ", yt_title)
 
@@ -105,7 +110,7 @@ def content_has_youtube_link(content: str) -> tuple[bool, str|None]:
         print("message.content has YOUTUBE: ", youtube_match.group())
         return True, video_id
     else:
-        False, None
+        (False, None)
 
 
 def get_title_from_yt_link(yt_id: str, api=yt_api) -> str:
@@ -129,12 +134,17 @@ def get_spotify_uri_from_title(yt_title: str) -> str|None:
         return None
 
 
-def add_track_to_playlist(track_uri: str):
+def add_track_to_playlist(track_uri: str)-> bool:
     # Given a validated song, add it to the playlist
-    ...
+    try:
+        sp.playlist_add_items(PLAYLIST_ID, [track_uri])
+    except Exception as e:
+        print(f"Error adding track to playlist: {e}")
+        return False
+    return True
 
 
-def main(client, sp, yt_api):
+def main(client):
     # Suppress the default configuration since we have our own
     client.run(token=DISCORD_BOT_TOKEN, log_handler=None)
 

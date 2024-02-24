@@ -1,0 +1,15 @@
+[project]
+name = "disco_spot"
+version = "0.0.1"
+authors = [
+  {name = "Brian Cechmanek", email = "briankent@duck.com"}
+]
+maintainers = [
+  {name = "Brian Cechmanek", email = "briankent@duck.com"}
+]
+readme = "README.md"
+requires-python = ">= 3.11"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["dev.lock"] }
