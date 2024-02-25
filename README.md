@@ -14,12 +14,24 @@ A friendly discord bot to help add youtube music links to a spotify playlist.
 * I'll hopefully move the .env stuff out during dockerizing
 * You need to manually invite the bot to your server. for dev work, I've created my own server "Mumps Test Server", feel free to ask me for an invite to it. For your own, follow [these steps](https://discordpy.readthedocs.io/en/stable/discord.html#inviting-your-bot) (**For Doto Channel, I don't have “Manage Server” permissions**. Until bot is ready I won't worry about going there)
 
+## Requirements.lock
+
+Conda, turns out, sorta sucks for requirements files. Or I just don't know how to use it. Or both. So I just manually make a `requirements.lock` file and commit that. Update it manually if you change any packages.
+
+`conda list -e > requirements.lock`
+
 ## Running
 
 1. download this repo
 2. get all of the appropriate keys/tokens as in `.env.example`
 3. make/activate a venv
 4. run `python src/disco_spot/bot.py` (tbd: Dockerfile...)
+
+## Deployment
+
+Because Spotify is super dev hostile, deployment is a bit awkward: an Oauth login is required via a browser opening. Once logged in, a `.cache` file is created and should maintain login state. **Thus**, the bot must be run local, to log in, and then the `.cache` can be copied and sent into the headless bot.
+
+
 
 
 # Issues
