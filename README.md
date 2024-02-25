@@ -16,9 +16,9 @@ A friendly discord bot to help add youtube music links to a spotify playlist.
 
 ## Requirements.lock
 
-Conda, turns out, sorta sucks for requirements files. Or I just don't know how to use it. Or both. So I just manually make a `requirements.lock` file and commit that. Update it manually if you change any packages.
+Conda, turns out, sorta sucks for requirements files. Or I just don't know how to use it. Or both. So I just manually make a `requirements.lock` file and commit that. Update it manually if you change any packages. Use pip, and `--format` to ignore builds issues.
 
-`conda list -e > requirements.lock`
+`python -m pip list --format=freeze > requirements.lock`
 
 ## Running
 
