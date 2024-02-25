@@ -5,7 +5,8 @@ COPY ./.cache /app/.cache
 COPY ./.env /app/.env
 
 COPY ./requirements.lock /app/requirements.lock
-RUN apk add python3 py3-pip && pip install -r /app/requirements.lock && \
+RUN apk add python3 py3-pip && \
+    pip install -r /app/requirements.lock && \
     rm /app/requirements.lock
 
 
