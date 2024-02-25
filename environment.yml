@@ -6,6 +6,8 @@ dependencies:
   - ipykernel=6.29.2
   - pip>=23.3.1
   - pre-commit>=3.4.0
+  - pydantic=2.6.2
+  - pydantic-settings=2.2.1
   - pytest=8.0.1
   - python=3.11.*
   - python-dotenv=0.21.0
