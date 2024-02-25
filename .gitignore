@@ -17,3 +17,4 @@ __pycache__
 
 # spotify
 src/disco_spot/.cache
+.cache

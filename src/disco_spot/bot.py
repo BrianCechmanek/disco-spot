@@ -30,8 +30,6 @@ logger.addHandler(handler)
 
 logging.debug("Starting bot -- logging works")
 
-# will search for .env file in local folder and load variables
-
 
 class Config(BaseSettings):
     DISCORD_BOT_TOKEN: str
@@ -63,7 +61,6 @@ class DiscoBot:
                 scope=self.scope,
             )
         )
-        self.start()
 
     def start(self):
         bot = commands.Bot(command_prefix="!", intents=self.intents)
@@ -84,16 +81,26 @@ class DiscoBot:
                 await message.channel.send("Hello!")
                 logging.info("Hello message received and responded to")
                 return
+            case (
+                _,
+                "music",
+                _,
+            ) if message.author.name == "sceptre" and "wild wild" in message.content.lower():
+                await message.channel.send("I can't let you do that, Dave.")
+                return
             case _, "music", _:
                 is_yt, *yt_id = self.content_has_youtube_link(message.content)
                 if is_yt:
                     res = self.add_by_yt_id(yt_id)
                     if res:
                         await message.channel.send(f"Added {res} to playlist")
-                    return
                 else:
                     print("No Action for message : ", message.content)
-                    return
+                    # print(f"{message.author = }")
+                    # print(f"{message.channel.name = }")
+                    # print(f"{message.content = }")
+                    # print(f"{'wild' in message.content.lower() = }")
+                return
             case _:
                 return
 
@@ -156,12 +163,11 @@ class DiscoBot:
 
 
 def main():
-    DiscoBot()  # Bot starts() on init() - maybe shouldn't
-    # bot.client.run(token=config.DISCORD_BOT_TOKEN, log_handler=None)
+    bot = DiscoBot()  # bot.client.run(token=config.DISCORD_BOT_TOKEN, log_handler=None)
+    bot.start()
 
 
 if __name__ == "__main__":
     # force load .env file -- TODO can remove if dockerized and env vars are set
     load_dotenv()
-
     main()
