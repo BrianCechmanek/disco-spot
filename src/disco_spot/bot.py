@@ -50,7 +50,7 @@ class DiscoBot:
     # discord client
     intents = discord.Intents.default()
     intents.message_content = True
-    scope = "playlist-read-private"
+    scope = "playlist-modify-private"
 
     def __init__(self):
         self.config = Config()
@@ -77,45 +77,25 @@ class DiscoBot:
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        # TODO swap in match case
-        print("message received! ", message.content)
-        if message.author == self.client.user:
-            return
-        if not message.channel.name == "music":
-            return
-        if message.content.startswith("$hello"):
-            await message.channel.send("Hello!")
-            # print(f"message : {message.content}\nchannel: {message.channel}\n author: {message.author}\n server: {message.guild.name}")
-            logging.info("Hello message received and responsed to")
-            return
-
-        # begin check sequences
-        is_yt, *yt_id = self.content_has_youtube_link(message.content)
-        if is_yt:
-            await message.channel.send(
-                """I see you posted a YouTube link. I'm currently
-                                    working on a feature to get songs into a Spotify playlist.
-                                    Stay tuned"""
-            )
-            logging.info(
-                f"yt message : {message.content}\nchannel: {message.channel}\n author: {message.author}\n server: {message.guild.name}"
-            )
-            yt_title = self.get_title_from_yt_link(yt_id)
-            spotify_uri = self.get_spotify_uri_from_title(yt_title)
-            if spotify_uri:
-                res = self.add_track_to_playlist(spotify_uri)
-                if res:
-                    await message.channel.send(
-                        f"Added {yt_title} to the playlist. If this is wrong. thumbs down. I'll work on removing it"
-                    )
+        match message.author, message.channel.name, message.content:
+            case self.client.user, _, _:
+                return
+            case _, _, _ if message.content.startswith("$hello"):
+                await message.channel.send("Hello!")
+                logging.info("Hello message received and responded to")
+                return
+            case _, "music", _:
+                is_yt, *yt_id = self.content_has_youtube_link(message.content)
+                if is_yt:
+                    res = self.add_by_yt_id(yt_id)
+                    if res:
+                        await message.channel.send(f"Added {res} to playlist")
+                    return
                 else:
-                    await message.channel.send(
-                        f"Failed to add {yt_title} to the playlist."
-                    )
-            else:
-                print("No Spotify URI found for song: ", yt_title)
-        else:
-            print("No Action for message : ", message.content)
+                    print("No Action for message : ", message.content)
+                    return
+            case _:
+                return
 
     @staticmethod
     def content_has_youtube_link(content: str) -> tuple[bool, str | None]:
@@ -152,11 +132,27 @@ class DiscoBot:
     def add_track_to_playlist(self, track_uri: str) -> bool:
         # Given a validated song, add it to the playlist
         try:
-            self.sp.playlist_add_items(self.PLAYLIST_ID, [track_uri])
+            self.sp.playlist_add_items(self.config.PLAYLIST_ID, [track_uri])
         except Exception as e:
             print(f"Error adding track to playlist: {e}")
             return False
         return True
+
+    def get_spotify_title_from_uri(self, spotify_uri: str) -> str:
+        """Get the title of the song from the uri"""
+        return self.sp.track(spotify_uri)["name"]
+
+    def add_by_yt_id(self, yt_id: str) -> str | None:
+        """Try to add a song, and return the track title added. maybe spotify url too?"""
+        if yt_title := self.get_title_from_yt_link(yt_id):
+            if spotify_uri := self.get_spotify_uri_from_title(yt_title):
+                spotify_title = self.get_spotify_title_from_uri(spotify_uri)
+                self.add_track_to_playlist(spotify_uri)
+                return spotify_title
+            else:
+                return f"No Spotify URI found for title: {yt_title}"
+        else:
+            print("No title found for video: ", yt_id)
 
 
 def main():
