@@ -1,9 +1,6 @@
 import pytest
 
-from disco_spot.bot import (
-    Config,
-    DiscoBot
-)
+from disco_spot.bot import Config, DiscoBot
 
 
 def test_Config_from_environment_variables(monkeypatch):
@@ -30,11 +27,20 @@ def test_Config_from_environment_variables(monkeypatch):
 
 
 class TestDiscoBot:
-    @pytest.mark.parametrize("text, expected",  [
-        ("https://www.youtube.com/watch?v=6JYIGclVQdw", (True, "6JYIGclVQdw"),),
-        ("this text has no link", (False, None)),
-        ("this text has a link https://www.youtube.com/watch?v=U7mPqycQ0tQ", (True, "U7mPqycQ0tQ"),)
-    ])
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            (
+                "https://www.youtube.com/watch?v=6JYIGclVQdw",
+                (True, "6JYIGclVQdw"),
+            ),
+            ("this text has no link", (False, None)),
+            (
+                "this text has a link https://www.youtube.com/watch?v=U7mPqycQ0tQ",
+                (True, "U7mPqycQ0tQ"),
+            ),
+        ],
+    )
     def test_content_has_youtube_link(self, text, expected):
         res = DiscoBot.content_has_youtube_link(text)
         assert res == expected
