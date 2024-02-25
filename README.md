@@ -44,3 +44,5 @@ So many, dude. But, baby steps
 4. ~~look for some sort of meta tag to try and figure out if the posted video is a song.~~
 5. remove duplicate versions of wild wild west
 6. ~~interact with spotify api to add song title to playlist.~~ works! logging in sucks though
+7. Dockerize
+8. Launch and run-with-restart on lab/Portainer
