@@ -13,6 +13,7 @@
 
 #python things
 __pycache__
+*.egg-info
 
 # spotify
 src/disco_spot/.cache
