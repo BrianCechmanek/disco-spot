@@ -20,6 +20,8 @@ Conda, turns out, sorta sucks for requirements files. Or I just don't know how t
 
 `python -m pip list --format=freeze > requirements.lock`
 
+**Edit**: lock file was giving versions problems. went to simple `requirements.txt` and won't worry about version updates.
+
 ## Running
 
 1. download this repo
