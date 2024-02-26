@@ -94,6 +94,11 @@ class DiscoBot:
                     res = self.add_by_yt_id(yt_id)
                     if res:
                         await message.channel.send(f"Added {res} to playlist")
+                elif sp_uri := self.content_has_spotify_uri(message.content):
+                    self.add_track_to_playlist(sp_uri)
+                    await message.channel.send(
+                        f"Added {self.get_spotify_title_from_uri(sp_uri)} to playlist"
+                    )
                 else:
                     print("No Action for message : ", message.content)
                     # print(f"{message.author = }")
@@ -134,6 +139,16 @@ class DiscoBot:
             return track["uri"]
         else:
             print("No tracks found.")
+            return None
+
+    def content_has_spotify_uri(content: str) -> str | None:
+        sp_regex = r"open\.spotify\.com\/track\/([a-zA-Z0-9]+)(?=\?si=)"
+        sp_match = re.search(sp_regex, content)
+        if sp_match:
+            track_id = sp_match.group(1)
+            print("message.content has SPOTIFY: ", track_id)
+            return track_id
+        else:
             return None
 
     def add_track_to_playlist(self, track_uri: str) -> bool:
