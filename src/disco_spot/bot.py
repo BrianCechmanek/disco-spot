@@ -141,7 +141,7 @@ class DiscoBot:
             print("No tracks found.")
             return None
 
-    def content_has_spotify_uri(content: str) -> str | None:
+    def content_has_spotify_uri(self, content: str) -> str | None:
         sp_regex = r"open\.spotify\.com\/track\/([a-zA-Z0-9]+)(?=\?si=)"
         sp_match = re.search(sp_regex, content)
         if sp_match:
