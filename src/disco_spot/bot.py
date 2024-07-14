@@ -61,6 +61,8 @@ class DiscoBot:
                 scope=self.scope,
             )
         )
+        most_epic_playlist = self.sp.playlist(self.config.PLAYLIST_ID)
+        self.playlist_url = most_epic_playlist['external_urls']['spotify']
 
     def start(self):
         bot = commands.Bot(command_prefix="!", intents=self.intents)
@@ -93,11 +95,14 @@ class DiscoBot:
                 if is_yt:
                     res = self.add_by_yt_id(yt_id)
                     if res:
-                        await message.channel.send(f"Added {res} to playlist")
+                        await message.channel.send(
+                            f"Added {res} to [playlist]({self.playlist_url})"
+                        )
                 elif sp_uri := self.content_has_spotify_uri(message.content):
                     self.add_track_to_playlist(sp_uri)
+                    title = self.get_spotify_title_from_uri(sp_uri)
                     await message.channel.send(
-                        f"Added {self.get_spotify_title_from_uri(sp_uri)} to playlist"
+                        f"Added {title} to the [playlist]({self.playlist_url})"
                     )
                 else:
                     print("No Action for message : ", message.content)
