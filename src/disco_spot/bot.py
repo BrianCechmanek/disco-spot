@@ -94,6 +94,10 @@ class DiscoBot:
                 return
             # Add to playlist, if it's a yt or sp song
             case _, "music", _:
+                if message.content.startswith("$playlist url"):
+                    most_epic_playlist = self.sp.playlist(self.config.PLAYLIST_ID)
+                    await message.channel.send(f"Playlist url: {most_epic_playlist}")
+                    return
                 is_yt, *yt_id = self.content_has_youtube_link(message.content)
                 if is_yt:
                     res = self.add_by_yt_id(yt_id)
@@ -110,10 +114,6 @@ class DiscoBot:
                     # print(f"{message.content = }")
                     # print(f"{'wild' in message.content.lower() = }")
                 return
-
-            case _, "music", _ if message.content.startswith("$playlist url"):
-                most_epic_playlist = self.sp.playlist(self.config.PLAYLIST_ID)
-                await message.channel.send(f"Playlist url: {most_epic_playlist}")
             case _:
                 return
 
