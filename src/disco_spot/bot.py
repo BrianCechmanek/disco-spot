@@ -94,7 +94,9 @@ class DiscoBot:
                 return
             # Send the playlist it it's requested
             case (_, "music", _) if message.content.startswith("$playlist"):
-                most_epic_playlist = self.sp.playlist(self.config.PLAYLIST_ID)
+                most_epic_playlist = self.get_playlist_url_from_id(
+                    self.config.PLAYLIST_ID
+                )
                 await message.channel.send(f"Playlist url: {most_epic_playlist}")
                 return
             # Add to playlist, if it's a yt or sp song
