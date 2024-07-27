@@ -61,8 +61,6 @@ class DiscoBot:
                 scope=self.scope,
             )
         )
-        most_epic_playlist = self.sp.playlist(self.config.PLAYLIST_ID)
-        self.playlist_url = most_epic_playlist['external_urls']['spotify']
 
     def start(self):
         bot = commands.Bot(command_prefix="!", intents=self.intents)
@@ -77,12 +75,16 @@ class DiscoBot:
     @commands.Cog.listener()
     async def on_message(self, message):
         match message.author, message.channel.name, message.content:
+            # Stop bot from responding to itself, ever
             case self.client.user, _, _:
                 return
+            # Hello & logging test message
             case _, _, _ if message.content.startswith("$hello"):
                 await message.channel.send("Hello!")
                 logging.info("Hello message received and responded to")
                 return
+            # no WWW from dfb - let's see how hard you want to sneak
+            # past this one -- no cheating!
             case (
                 _,
                 "music",
@@ -90,20 +92,17 @@ class DiscoBot:
             ) if message.author.name == "sceptre" and "wild wild" in message.content.lower():
                 await message.channel.send("I can't let you do that, Dave.")
                 return
+            # Add to playlist, if it's a yt or sp song
             case _, "music", _:
                 is_yt, *yt_id = self.content_has_youtube_link(message.content)
                 if is_yt:
                     res = self.add_by_yt_id(yt_id)
                     if res:
-                        await message.channel.send(
-                            f"Added {res} to [playlist]({self.playlist_url})"
-                        )
+                        await message.channel.send(f"Added {res} to playlist")
                 elif sp_uri := self.content_has_spotify_uri(message.content):
                     self.add_track_to_playlist(sp_uri)
                     title = self.get_spotify_title_from_uri(sp_uri)
-                    await message.channel.send(
-                        f"Added {title} to the [playlist]({self.playlist_url})"
-                    )
+                    await message.channel.send(f"Added {title} to playlist")
                 else:
                     print("No Action for message : ", message.content)
                     # print(f"{message.author = }")
@@ -111,6 +110,10 @@ class DiscoBot:
                     # print(f"{message.content = }")
                     # print(f"{'wild' in message.content.lower() = }")
                 return
+
+            case _, "music", _ if message.content.startswith("$playlist url"):
+                most_epic_playlist = self.sp.playlist(self.config.PLAYLIST_ID)
+                await message.channel.send(f"Playlist url: {most_epic_playlist}")
             case _:
                 return
 
@@ -126,6 +129,13 @@ class DiscoBot:
             return True, video_id
         else:
             return (False, None)
+
+    def get_playlist_url_from_id(self, playlist_id: str) -> str:
+        playlist = self.sp.playlist(playlist_id)
+        playlist_url = playlist.get("external_urls", "").get(
+            "spotify", "Error retrieving playlist url"
+        )
+        return playlist_url
 
     def get_title_from_yt_link(self, yt_id: str) -> str:
         """Use the yt to get the video title from the id. assume it is a song, for now"""

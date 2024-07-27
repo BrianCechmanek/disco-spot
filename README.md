@@ -22,17 +22,27 @@ Conda, turns out, sorta sucks for requirements files. Or I just don't know how t
 
 **Edit**: lock file was giving versions problems. went to simple `requirements.txt` and won't worry about version updates.
 
-## Running
+## Running (no Docker)
 
 1. download this repo
 2. get all of the appropriate keys/tokens as in `.env.example`
 3. make/activate a venv
 4. run `python src/disco_spot/bot.py` (tbd: Dockerfile...)
 
-## Deployment
+## Deployment (Docker)
 
 Because Spotify is super dev hostile, deployment is a bit awkward: an Oauth login is required via a browser opening. Once logged in, a `.cache` file is created and should maintain login state. **Thus**, the bot must be run local, to log in, and then the `.cache` can be copied and sent into the headless bot.
 
+### Building Docker Image
+
+1. make sure you have the `.cache` file, in the repo folder
+2. Build the docker image:
+
+`$ docker build -t disco-spot-v1`    # or latest. whatever
+
+3. Start the image:
+
+`docker run --name=disco-spot-v1 --detach --restart=unless-stopped disco-spot-v1`
 
 
 
@@ -60,3 +70,4 @@ So many, dude. But, baby steps
 6. ~~interact with spotify api to add song title to playlist.~~ works! logging in sucks though
 7. Dockerize
 8. Launch and run-with-restart on lab/Portainer
+9. Break out case-match logic into cleaner message parsing sub service. i.e. more scalable for new commands and ability to list all
