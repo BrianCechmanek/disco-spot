@@ -26,7 +26,7 @@ Conda, turns out, sorta sucks for requirements files. Or I just don't know how t
 
 1. download this repo
 2. get all of the appropriate keys/tokens as in `.env.example`
-3. make/activate a venv
+3. make/activate a venv (in windows: `conda activate disco`, or whatever env was named)
 4. run `python src/disco_spot/bot.py` (tbd: Dockerfile...)
 
 ## Deployment (Docker)

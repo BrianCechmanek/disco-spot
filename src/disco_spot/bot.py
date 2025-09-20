@@ -104,8 +104,12 @@ class DiscoBot:
                 is_yt, *yt_id = self.content_has_youtube_link(message.content)
                 if is_yt:
                     res = self.add_by_yt_id(yt_id)
-                    if res:
+                    if res is not None:
                         await message.channel.send(f"Added {res} to playlist")
+                    if res is None:
+                        await message.channel.send(
+                            "Couldn't match yt title string to an appropriate Spotify URI"
+                        )
                 elif sp_uri := self.content_has_spotify_uri(message.content):
                     self.add_track_to_playlist(sp_uri)
                     title = self.get_spotify_title_from_uri(sp_uri)
@@ -145,22 +149,31 @@ class DiscoBot:
         # This pastebin https://pastebin.com/Dy7eUFdS
         # may have a short-circuit to title and artist, if we wanna try.
         video = self.yt_api.get_video_by_id(video_id=yt_id)
-        return video.items[0].snippet.title
+
+        # try to clean the title of crud
+        cleaned_title = self.clean_yt_title(video.items[0].snippet.title)
+        return cleaned_title
 
     def get_spotify_uri_from_title(self, yt_title: str) -> str | None:
-        results = self.sp.search(q=yt_title, type="track", limit=1)
+        """Get Spotify URI from a (cleaned) YouTube title."""
+        print("-----DEBUG get_spotify_uri_from_title-----")
+        print(f"{yt_title = }")
+        best_track = self.search_best_match(yt_title)
+        print(f"{best_track = }")
+        print("-----END DEBUG get_spotify_uri_from_title-----")
 
-        tracks = results["tracks"]["items"]
-        if tracks:
-            track = tracks[0]
-            print(f"Track Name: {track['name']}, Artist: {track['artists'][0]['name']}")
-            return track["uri"]
+        if best_track:
+            print(
+                f"Track Name: {best_track['name']}, Artist: {best_track['artists'][0]['name']}"
+            )
+            return best_track["uri"]
         else:
             print("No tracks found.")
             return None
 
-    def content_has_spotify_uri(self, content: str) -> str | None:
-        sp_regex = r"open\.spotify\.com\/track\/([a-zA-Z0-9]+)(?=\?si=)"
+    @staticmethod
+    def content_has_spotify_uri(content: str) -> str | None:
+        sp_regex = r"open\.spotify\.com/track/([A-Za-z0-9]+)"
         sp_match = re.search(sp_regex, content)
         if sp_match:
             track_id = sp_match.group(1)
@@ -190,9 +203,69 @@ class DiscoBot:
                 self.add_track_to_playlist(spotify_uri)
                 return spotify_title
             else:
-                return f"No Spotify URI found for title: {yt_title}"
+                print(f"No Spotify URI found for title: {yt_title}")
         else:
             print("No title found for video: ", yt_id)
+
+    def clean_yt_title(self, title: str) -> str:
+        """Remove unwanted clutter from YouTube title but keep artist names."""
+        # Remove stuff in parentheses/brackets
+        title = re.sub(r"[\(\[].*?[\)\]]", "", title)
+        # Remove common junk words that are not artist info
+        junk = ["official video", "lyrics", "hd", "remix", "live"]
+        for j in junk:
+            title = re.sub(j, "", title, flags=re.IGNORECASE)
+        return title.strip()
+
+    def make_queries(self, cleaned: str) -> list[str]:
+        """
+        Create Spotify search queries from a cleaned YouTube title.
+
+        Keeps featured artists in the track field, splits on common separators,
+        and tries both artist-track orders.
+        """
+        queries = []
+
+        # First, split on " - " (common format: Artist - Track)
+        if " - " in cleaned:
+            artist, track = cleaned.split(" - ", 1)
+        else:
+            # fallback: treat entire string as track
+            artist, track = "", cleaned
+
+        artist = artist.strip()
+        track = track.strip()
+
+        # Spotify search query format:
+        # - if artist is known, use artist + track
+        # - if not, just track
+        if artist:
+            queries.append(f"artist: {artist} track: {track}")
+            # fallback: swap artist/track just in case
+            queries.append(f"artist: {track} track: {artist}")
+        else:
+            queries.append(f"track:{track}")
+
+        return queries
+
+    def pick_best_track(self, items, desired_title):
+        # If Spotify already returned an exact track, just take the first
+        if items:
+            return items[0]
+        return None
+
+    def search_best_match(self, yt_title: str):
+        """Run multiple queries against Spotify and return the best track dict."""
+        cleaned = self.clean_yt_title(yt_title)
+
+        queries = self.make_queries(cleaned)
+
+        for q in queries:
+            results = self.sp.search(q=q, type="track", limit=10)
+            best = self.pick_best_track(results["tracks"]["items"], cleaned)
+            if best:
+                return best
+        return None
 
 
 def main():
